@@ -111,11 +111,11 @@ spin: //spin in case the size changes under us...
 }
 
 + (const char*)toCString:(NSString*)str {
-	return [str cStringUsingEncoding:NSASCIIStringEncoding]; //Tiger 10.4
+	return [str UTF8String]; //Tiger 10.4
 }
 
 + (NSString*)fromCString:(char*)str {
-	return [[[NSString alloc] initWithCString:str encoding:NSASCIIStringEncoding] autorelease]; //Tiger 10.4
+	return [[[NSString alloc] initWithCString:str encoding:NSUTF8StringEncoding] autorelease]; //Tiger 10.4
 }
 
 - (BOOL)removeDataForKey:(NSString *)key {
