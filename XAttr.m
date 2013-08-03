@@ -48,7 +48,7 @@ spin: //spin in case the size changes under us...
 	return nil;
 }
 
-- (NSData *)getValue:(const char *)key
+- (NSData *)valueDataForKey:(const char *)key
 {
 	int options = 0x00;
 	char *buff;
@@ -161,20 +161,20 @@ spin: //spin in case the size changes under us...
 		return nil;
 	}
 	const char *keyname = [key UTF8String];
-	return [self getValue:keyname];
+	return [self valueDataForKey:keyname];
 }
 
 //will return nil if fails to read data
 - (NSArray *)keys
 {
-	NSData *list = [self getAttributeListData];
-	if (!list) {
+	NSData *listData = [self getAttributeListData];
+	if (!listData) {
 		return nil;
 	}
 	NSMutableArray *array = [[NSMutableArray alloc] init];
 	char *key;
-	char *start = (char *)[list bytes];
-	for (key = start; (key - start) < [list length]; key += strlen(key) + 1) {
+	char *start = (char *)[listData bytes];
+	for (key = start; (key - start) < [listData length]; key += strlen(key) + 1) {
 		NSString *name = [NSString stringWithUTF8String:key];
 		[array addObject:name];
 	}
