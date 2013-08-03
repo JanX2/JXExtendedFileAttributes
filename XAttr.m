@@ -89,7 +89,7 @@ spin: //spin in case the size changes under us...
 
 - (void)dealloc
 {
-	NSLog(@"dealloc: XAttr");
+	//NSLog(@"dealloc: XAttr");
 	[self closeFile];
 	[super dealloc];
 }
