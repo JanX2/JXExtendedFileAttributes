@@ -12,6 +12,7 @@
 	int fd;
 }
 
+- (id)initWithURL:(NSURL *)theURL;
 - (id)initWithFilePath:(NSString *)path;
 
 // Return array of NSString*, return nil if fails
