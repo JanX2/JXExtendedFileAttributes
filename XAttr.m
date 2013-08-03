@@ -110,18 +110,10 @@ spin: //spin in case the size changes under us...
 	return YES;
 }
 
-+ (const char*)toCString:(NSString*)str {
-	return [str UTF8String]; //Tiger 10.4
-}
-
-+ (NSString*)fromCString:(char*)str {
-	return [[[NSString alloc] initWithCString:str encoding:NSUTF8StringEncoding] autorelease]; //Tiger 10.4
-}
-
 - (BOOL)removeDataForKey:(NSString *)key {
 	if(fd==-1) return NO;
 	int options = 0x00;
-	const char * keyname = [XAttr toCString:key];
+	const char * keyname = [key UTF8String];
 	int ret = fremovexattr(fd, keyname, options);	
 	return (ret==0);
 }
@@ -129,7 +121,7 @@ spin: //spin in case the size changes under us...
 - (BOOL)setData:(NSData *)value forKey:(NSString *)key {
 	if(fd==-1) return NO;
 	int options = 0x00;
-	const char * keyname = [XAttr toCString:key];
+	const char * keyname = [key UTF8String];
 	int ret = fsetxattr(fd, keyname, (char*)[value bytes], [value length], 0, options);
 	return (ret==0);
 }
@@ -137,7 +129,7 @@ spin: //spin in case the size changes under us...
 //will return nil if fails to read data
 - (NSData *)dataForKey:(NSString *)key {	
 	if(fd==-1) return nil;
-	const char * keyname = [XAttr toCString:key];
+	const char * keyname = [key UTF8String];
 	return [self getValue:keyname];	
 }
 
@@ -149,7 +141,7 @@ spin: //spin in case the size changes under us...
 	char * key;
 	char * start = (char*)[list bytes];
 	for(key = start; (key-start)<[list length]; key+=strlen(key)+1) {
-		NSString * name = [XAttr fromCString:key];	
+		NSString * name = [NSString stringWithUTF8String:key];
 		[array addObject:name];
 	}
 	return [array autorelease];
