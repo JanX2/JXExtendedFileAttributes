@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 @interface XAttr : NSObject {
-    int fd;
+	int fd;
 }
 
 - (id)initWithFilePath:(NSString *)path;
