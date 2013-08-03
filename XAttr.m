@@ -115,7 +115,7 @@ spin: //spin in case the size changes under us...
 }
 
 + (NSString*)fromCString:(char*)str {
-	return [[NSString alloc] initWithCString:str encoding:NSASCIIStringEncoding]; //Tiger 10.4
+	return [[[NSString alloc] initWithCString:str encoding:NSASCIIStringEncoding] autorelease]; //Tiger 10.4
 }
 
 - (BOOL)removeDataForKey:(NSString *)key {
@@ -151,9 +151,8 @@ spin: //spin in case the size changes under us...
 	for(key = start; (key-start)<[list length]; key+=strlen(key)+1) {
 		NSString * name = [XAttr fromCString:key];	
 		[array addObject:name];
-		[name release]; //now owned by dict if need be
 	}
-	return array;
+	return [array autorelease];
 }
 
 @end
