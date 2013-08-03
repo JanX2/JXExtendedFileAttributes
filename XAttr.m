@@ -20,7 +20,7 @@
 - (NSData*)getList {
 	int options = 0x00;
 	char * buff;
-	size_t size = flistxattr(fd, NULL, 0, options);
+	ssize_t size = flistxattr(fd, NULL, 0, options);
 	if(size==-1) return nil;
 	NSMutableData * data = [NSMutableData dataWithCapacity:size];
 	[data setLength:size];
@@ -48,7 +48,7 @@ spin: //spin in case the size changes under us...
 - (NSData*)getValue:(const char *)key {
 	int options = 0x00;
 	char * buff;
-	size_t size = fgetxattr(fd, key, NULL, 0, 0, options);
+	ssize_t size = fgetxattr(fd, key, NULL, 0, 0, options);
 	if(size==-1) return nil;
 	NSMutableData * data = [NSMutableData dataWithCapacity:size];
 	[data setLength:size];
