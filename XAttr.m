@@ -17,7 +17,7 @@
 
 @implementation XAttr
 
-- (NSData *)getList
+- (NSData *)getAttributeListData
 {
 	int options = 0x00;
 	char *buff;
@@ -116,7 +116,7 @@ spin: //spin in case the size changes under us...
 
 - (BOOL)removeAllData
 {
-	NSData *list = [self getList];
+	NSData *list = [self getAttributeListData];
 	if (!list) {
 		return NO;
 	}
@@ -167,7 +167,7 @@ spin: //spin in case the size changes under us...
 //will return nil if fails to read data
 - (NSArray *)keys
 {
-	NSData *list = [self getList];
+	NSData *list = [self getAttributeListData];
 	if (!list) {
 		return nil;
 	}
