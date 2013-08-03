@@ -15,22 +15,22 @@
 - (id)initWithURL:(NSURL *)theURL;
 - (id)initWithFile:(NSString *)path;
 
-// Return array of NSString*, return nil if fails
+// Returns an array of NSString, returns nil on failure
 - (NSArray *)keys;
 
-// Return nil if fails
+// Returns nil on failure
 - (NSData *)dataForKey:(NSString *)key;
 
-// Return YES if succeeded
+// Returns YES if successful
 - (BOOL)removeDataForKey:(NSString *)key;
 
-// Return YES if succeeded
+// Returns YES if successful
 - (BOOL)removeAllData;
 
-// Return YES if succeeded
+// Returns YES if successful
 - (BOOL)setData:(NSData *)value forKey:(NSString *)key;
 
-// Close immediately rather than wait for dealloc
+// Close file immediately rather than waiting for dealloc
 - (void)closeFile;
 
 @end
