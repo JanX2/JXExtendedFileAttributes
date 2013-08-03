@@ -97,13 +97,13 @@ spin: //spin in case the size changes under us...
 - (id)initWithURL:(NSURL *)theURL;
 {
 	if ([theURL isFileURL] || [theURL isFileReferenceURL]) {
-		return [self initWithFilePath:[theURL path]];
+		return [self initWithFile:[theURL path]];
 	} else {
 		return nil;
 	}
 }
 
-- (id)initWithFilePath:(NSString *)path
+- (id)initWithFile:(NSString *)path
 {
 	if (self = [super init]) {
 		fd = open([path fileSystemRepresentation], O_RDONLY, 0);

@@ -13,7 +13,7 @@
 }
 
 - (id)initWithURL:(NSURL *)theURL;
-- (id)initWithFilePath:(NSString *)path;
+- (id)initWithFile:(NSString *)path;
 
 // Return array of NSString*, return nil if fails
 - (NSArray *)keys;
