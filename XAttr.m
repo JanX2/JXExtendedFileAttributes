@@ -136,6 +136,12 @@ spin: //spin in case the size changes under us...
 	return YES;
 }
 
+
+#define xattrKeynameCStringForNSString(keyname, key)	\
+	char keyname[XATTR_MAXNAMELEN + 1];\
+	if ([key getCString:keyname maxLength:(XATTR_MAXNAMELEN + 1) encoding:NSUTF8StringEncoding] == NO)  return NO;
+
+
 - (BOOL)removeDataForKey:(NSString *)key
 {
 	if (fd == -1) {
@@ -144,7 +150,7 @@ spin: //spin in case the size changes under us...
 	
 	int options = 0x00;
 	
-	const char *keyname = [key UTF8String];
+	xattrKeynameCStringForNSString(keyname, key);
 	int ret = fremovexattr(fd, keyname, options);
 	return ret == 0;
 }
@@ -157,7 +163,7 @@ spin: //spin in case the size changes under us...
 	
 	int options = 0x00;
 	
-	const char *keyname = [key UTF8String];
+	xattrKeynameCStringForNSString(keyname, key);
 	int ret = fsetxattr(fd, keyname, (char *)[value bytes], [value length], 0, options);
 	return ret == 0;
 }
@@ -169,7 +175,7 @@ spin: //spin in case the size changes under us...
 		return nil;
 	}
 	
-	const char *keyname = [key UTF8String];
+	xattrKeynameCStringForNSString(keyname, key);
 	return [self valueDataForKey:keyname];
 }
 
