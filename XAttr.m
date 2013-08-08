@@ -56,6 +56,7 @@ spin: //spin in case the size changes under us...
 	if (size == -1) {
 		return nil;
 	}
+	
 	NSMutableData *data = [NSMutableData dataWithCapacity:size];
 	[data setLength:size];
 spin: //spin in case the size changes under us...
@@ -117,9 +118,11 @@ spin: //spin in case the size changes under us...
 - (BOOL)removeAllData
 {
 	NSData *list = [self getAttributeListData];
+	
 	if (!list) {
 		return NO;
 	}
+	
 	int options = 0x00;
 	char *key;
 	char *start = (char *)[list bytes];
@@ -129,6 +132,7 @@ spin: //spin in case the size changes under us...
 			return NO;
 		}
 	}
+	
 	return YES;
 }
 
@@ -137,7 +141,9 @@ spin: //spin in case the size changes under us...
 	if (fd == -1) {
 		return NO;
 	}
+	
 	int options = 0x00;
+	
 	const char *keyname = [key UTF8String];
 	int ret = fremovexattr(fd, keyname, options);
 	return ret == 0;
@@ -148,7 +154,9 @@ spin: //spin in case the size changes under us...
 	if (fd == -1) {
 		return NO;
 	}
+	
 	int options = 0x00;
+	
 	const char *keyname = [key UTF8String];
 	int ret = fsetxattr(fd, keyname, (char *)[value bytes], [value length], 0, options);
 	return ret == 0;
@@ -160,6 +168,7 @@ spin: //spin in case the size changes under us...
 	if (fd == -1) {
 		return nil;
 	}
+	
 	const char *keyname = [key UTF8String];
 	return [self valueDataForKey:keyname];
 }
