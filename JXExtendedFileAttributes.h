@@ -31,6 +31,7 @@
 - (BOOL)removeAllData;
 
 // Returns YES if successful
+// Removes data if value is nil
 - (BOOL)setData:(NSData *)value forKey:(NSString *)key;
 
 // Close file immediately rather than waiting for dealloc
