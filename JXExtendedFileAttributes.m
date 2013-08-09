@@ -133,17 +133,17 @@ spin: // Spin in case the size changes under us…
 
 - (BOOL)removeAllData
 {
-	NSData *list = [self _getAttributeListData];
+	NSData *listData = [self _getAttributeListData];
 	
-	if (!list) {
+	if (listData == nil) {
 		return NO;
 	}
 	
 	int options = 0x00;
 	char *key;
-	char *start = (char *)[list bytes];
+	char *start = (char *)[listData bytes];
 	
-	for (key = start; (key - start) < [list length]; key += strlen(key) + 1) {
+	for (key = start; (key - start) < [listData length]; key += strlen(key) + 1) {
 		int ret = fremovexattr(fd, key, options);
 		if (ret != 0) {
 			return NO;
@@ -198,7 +198,7 @@ spin: // Spin in case the size changes under us…
 - (NSArray *)keys
 {
 	NSData *listData = [self _getAttributeListData];
-	if (!listData) {
+	if (listData == nil) {
 		return nil;
 	}
 	
