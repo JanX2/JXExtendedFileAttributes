@@ -105,7 +105,9 @@ spin: // Spin in case the size changes under us…
 {
 	[self closeFile];
 	
+#if !__has_feature(objc_arc)
 	[super dealloc];
+#endif
 }
 
 - (id)initWithURL:(NSURL *)theURL;
@@ -124,7 +126,9 @@ spin: // Spin in case the size changes under us…
 		fd = open([path fileSystemRepresentation], O_RDONLY, 0);
 		if (fd < 0) {
 			//NSLog(@"Err: Unable to open file");
+#if !__has_feature(objc_arc)
 			[self release];
+#endif
 			return nil;
 		}
 	}
@@ -206,7 +210,7 @@ spin: // Spin in case the size changes under us…
 		return nil;
 	}
 	
-	NSMutableArray *array = [[NSMutableArray alloc] init];
+	NSMutableArray *array = [NSMutableArray array];
 	char *key;
 	char *start = (char *)[listData bytes];
 	
@@ -215,7 +219,7 @@ spin: // Spin in case the size changes under us…
 		[array addObject:name];
 	}
 	
-	return [array autorelease];
+	return array;
 }
 
 @end
