@@ -19,7 +19,7 @@
 
 @implementation JXExtendedFileAttributes
 
-- (NSData *)getAttributeListData
+- (NSData *)_getAttributeListData
 {
 	int options = 0x00;
 	char *buff;
@@ -133,7 +133,7 @@ spin: // Spin in case the size changes under us…
 
 - (BOOL)removeAllData
 {
-	NSData *list = [self getAttributeListData];
+	NSData *list = [self _getAttributeListData];
 	
 	if (!list) {
 		return NO;
@@ -197,7 +197,7 @@ spin: // Spin in case the size changes under us…
 
 - (NSArray *)keys
 {
-	NSData *listData = [self getAttributeListData];
+	NSData *listData = [self _getAttributeListData];
 	if (!listData) {
 		return nil;
 	}
