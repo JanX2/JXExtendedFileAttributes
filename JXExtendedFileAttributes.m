@@ -56,7 +56,7 @@ spin: // Spin in case the size changes under us…
 	return nil;
 }
 
-- (NSData *)valueDataForCStringKey:(const char *)key
+- (NSData *)_valueDataForCStringKey:(const char *)key
 {
 	int options = 0x00;
 	char *buff;
@@ -192,7 +192,7 @@ spin: // Spin in case the size changes under us…
 	}
 	
 	xattrKeynameCStringForNSString(keyname, key);
-	return [self valueDataForCStringKey:keyname];
+	return [self _valueDataForCStringKey:keyname];
 }
 
 - (NSArray *)keys
