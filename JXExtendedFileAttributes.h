@@ -11,7 +11,7 @@
 #import <Cocoa/Cocoa.h>
 
 @interface JXExtendedFileAttributes : NSObject {
-	int fd;
+	int _fd;
 }
 
 // Returns nil on failure

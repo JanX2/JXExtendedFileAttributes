@@ -24,7 +24,7 @@
 	int options = 0x00;
 	char *buff;
 	
-	ssize_t size = flistxattr(fd, NULL, 0, options);
+	ssize_t size = flistxattr(_fd, NULL, 0, options);
 	if (size == -1) {
 		return nil;
 	}
@@ -36,7 +36,7 @@ spin: // Spin in case the size changes under us…
 	buff = (char *)[data mutableBytes];
 	errno = 0;
 	
-	size = flistxattr(fd, buff, size, options);
+	size = flistxattr(_fd, buff, size, options);
 	if (size != -1) {
 		// Success.
 		[data setLength:size];
@@ -45,7 +45,7 @@ spin: // Spin in case the size changes under us…
 	
 	if (errno == ERANGE) {
 		// Guess the value size again.
-		size = flistxattr(fd, NULL, 0, options);
+		size = flistxattr(_fd, NULL, 0, options);
 		if (size != -1) {
 			[data setLength:size];
 			goto spin;
@@ -61,7 +61,7 @@ spin: // Spin in case the size changes under us…
 	int options = 0x00;
 	char *buff;
 	
-	ssize_t size = fgetxattr(fd, key, NULL, 0, 0, options);
+	ssize_t size = fgetxattr(_fd, key, NULL, 0, 0, options);
 	if (size == -1) {
 		return nil;
 	}
@@ -73,7 +73,7 @@ spin: // Spin in case the size changes under us…
 	buff = (char *)[data mutableBytes];
 	errno = 0;
 	
-	size = fgetxattr(fd, key, buff, size, 0, options);
+	size = fgetxattr(_fd, key, buff, size, 0, options);
 	if (size != -1) {
 		// Success.
 		[data setLength:size];
@@ -82,7 +82,7 @@ spin: // Spin in case the size changes under us…
 	
 	if (errno == ERANGE) {
 		// Guess the value size again.
-		size = fgetxattr(fd, key, NULL, 0, 0, options);
+		size = fgetxattr(_fd, key, NULL, 0, 0, options);
 		if (size != -1) {
 			[data setLength:size];
 			goto spin;
@@ -95,9 +95,9 @@ spin: // Spin in case the size changes under us…
 
 - (void)closeFile
 {
-	if (fd != -1) {
-		close(fd);
-		fd = -1;
+	if (_fd != -1) {
+		close(_fd);
+		_fd = -1;
 	}
 }
 
@@ -123,8 +123,8 @@ spin: // Spin in case the size changes under us…
 - (id)initWithFile:(NSString *)path
 {
 	if (self = [super init]) {
-		fd = open([path fileSystemRepresentation], O_RDONLY, 0);
-		if (fd < 0) {
+		_fd = open([path fileSystemRepresentation], O_RDONLY, 0);
+		if (_fd < 0) {
 			//NSLog(@"Err: Unable to open file");
 #if !__has_feature(objc_arc)
 			[self release];
@@ -148,7 +148,7 @@ spin: // Spin in case the size changes under us…
 	char *start = (char *)[listData bytes];
 	
 	for (key = start; (key - start) < [listData length]; key += strlen(key) + 1) {
-		int ret = fremovexattr(fd, key, options);
+		int ret = fremovexattr(_fd, key, options);
 		if (ret != 0) {
 			return NO;
 		}
@@ -165,14 +165,14 @@ spin: // Spin in case the size changes under us…
 
 - (BOOL)removeDataForKey:(NSString *)key
 {
-	if (key == nil || fd == -1) {
+	if (key == nil || _fd == -1) {
 		return NO;
 	}
 	
 	int options = 0x00;
 	
 	xattrKeynameCStringForNSString(keyname, key);
-	int ret = fremovexattr(fd, keyname, options);
+	int ret = fremovexattr(_fd, keyname, options);
 	return ret == 0;
 }
 
@@ -182,20 +182,20 @@ spin: // Spin in case the size changes under us…
 		return [self removeDataForKey:key];
 	}
 	
-	if (key == nil || fd == -1) {
+	if (key == nil || _fd == -1) {
 		return NO;
 	}
 	
 	int options = 0x00;
 	
 	xattrKeynameCStringForNSString(keyname, key);
-	int ret = fsetxattr(fd, keyname, (char *)[value bytes], [value length], 0, options);
+	int ret = fsetxattr(_fd, keyname, (char *)[value bytes], [value length], 0, options);
 	return ret == 0;
 }
 
 - (NSData *)dataForKey:(NSString *)key
 {
-	if (key == nil || fd == -1) {
+	if (key == nil || _fd == -1) {
 		return nil;
 	}
 	
