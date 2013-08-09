@@ -66,6 +66,7 @@ spin: // Spin in case the size changes under us…
 	
 	NSMutableData *data = [NSMutableData dataWithCapacity:size];
 	[data setLength:size];
+	
 spin: // Spin in case the size changes under us…
 	buff = (char *)[data mutableBytes];
 	errno = 0;
@@ -137,6 +138,7 @@ spin: // Spin in case the size changes under us…
 	int options = 0x00;
 	char *key;
 	char *start = (char *)[list bytes];
+	
 	for (key = start; (key - start) < [list length]; key += strlen(key) + 1) {
 		int ret = fremovexattr(fd, key, options);
 		if (ret != 0) {
@@ -199,6 +201,7 @@ spin: // Spin in case the size changes under us…
 	NSMutableArray *array = [[NSMutableArray alloc] init];
 	char *key;
 	char *start = (char *)[listData bytes];
+	
 	for (key = start; (key - start) < [listData length]; key += strlen(key) + 1) {
 		NSString *name = [NSString stringWithUTF8String:key];
 		[array addObject:name];
