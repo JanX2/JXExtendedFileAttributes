@@ -121,7 +121,9 @@ spin: // Spin in case the size changes under us…
 	if (self = [super init]) {
 		fd = open([path fileSystemRepresentation], O_RDONLY, 0);
 		if (fd < 0) {
-			NSLog(@"Err: Unable to open file");
+			//NSLog(@"Err: Unable to open file");
+			[self release];
+			return nil;
 		}
 	}
 	return self;
