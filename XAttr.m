@@ -27,24 +27,24 @@
 	}
 	NSMutableData *data = [NSMutableData dataWithCapacity:size];
 	[data setLength:size];
-spin: //spin in case the size changes under us...
+spin: // Spin in case the size changes under us…
 	buff = (char *)[data mutableBytes];
 	errno = 0;
 	size = flistxattr(fd, buff, size, options);
 	if (size != -1) {
-		//success
+		// Success.
 		[data setLength:size];
 		return data;
 	}
 	if (errno == ERANGE) {
-		//guess the value size again
+		// Guess the value size again.
 		size = flistxattr(fd, NULL, 0, options);
 		if (size != -1) {
 			[data setLength:size];
 			goto spin;
 		}
 	}
-	//failure
+	// Failure.
 	return nil;
 }
 
@@ -59,24 +59,24 @@ spin: //spin in case the size changes under us...
 	
 	NSMutableData *data = [NSMutableData dataWithCapacity:size];
 	[data setLength:size];
-spin: //spin in case the size changes under us...
+spin: // Spin in case the size changes under us…
 	buff = (char *)[data mutableBytes];
 	errno = 0;
 	size = fgetxattr(fd, key, buff, size, 0, options);
 	if (size != -1) {
-		//success
+		// Success.
 		[data setLength:size];
 		return data;
 	}
 	if (errno == ERANGE) {
-		//guess the value size again
+		// Guess the value size again.
 		size = fgetxattr(fd, key, NULL, 0, 0, options);
 		if (size != -1) {
 			[data setLength:size];
 			goto spin;
 		}
 	}
-	//failure
+	// Failure.
 	return nil;
 }
 
@@ -168,7 +168,6 @@ spin: //spin in case the size changes under us...
 	return ret == 0;
 }
 
-//will return nil if fails to read data
 - (NSData *)dataForKey:(NSString *)key
 {
 	if (fd == -1) {
@@ -179,13 +178,13 @@ spin: //spin in case the size changes under us...
 	return [self valueDataForKey:keyname];
 }
 
-//will return nil if fails to read data
 - (NSArray *)keys
 {
 	NSData *listData = [self getAttributeListData];
 	if (!listData) {
 		return nil;
 	}
+	
 	NSMutableArray *array = [[NSMutableArray alloc] init];
 	char *key;
 	char *start = (char *)[listData bytes];
