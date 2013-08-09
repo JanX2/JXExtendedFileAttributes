@@ -21,21 +21,26 @@
 {
 	int options = 0x00;
 	char *buff;
+	
 	ssize_t size = flistxattr(fd, NULL, 0, options);
 	if (size == -1) {
 		return nil;
 	}
+	
 	NSMutableData *data = [NSMutableData dataWithCapacity:size];
 	[data setLength:size];
+	
 spin: // Spin in case the size changes under us…
 	buff = (char *)[data mutableBytes];
 	errno = 0;
+	
 	size = flistxattr(fd, buff, size, options);
 	if (size != -1) {
 		// Success.
 		[data setLength:size];
 		return data;
 	}
+	
 	if (errno == ERANGE) {
 		// Guess the value size again.
 		size = flistxattr(fd, NULL, 0, options);
@@ -44,6 +49,7 @@ spin: // Spin in case the size changes under us…
 			goto spin;
 		}
 	}
+	
 	// Failure.
 	return nil;
 }
@@ -52,6 +58,7 @@ spin: // Spin in case the size changes under us…
 {
 	int options = 0x00;
 	char *buff;
+	
 	ssize_t size = fgetxattr(fd, key, NULL, 0, 0, options);
 	if (size == -1) {
 		return nil;
@@ -62,12 +69,14 @@ spin: // Spin in case the size changes under us…
 spin: // Spin in case the size changes under us…
 	buff = (char *)[data mutableBytes];
 	errno = 0;
+	
 	size = fgetxattr(fd, key, buff, size, 0, options);
 	if (size != -1) {
 		// Success.
 		[data setLength:size];
 		return data;
 	}
+	
 	if (errno == ERANGE) {
 		// Guess the value size again.
 		size = fgetxattr(fd, key, NULL, 0, 0, options);
@@ -76,6 +85,7 @@ spin: // Spin in case the size changes under us…
 			goto spin;
 		}
 	}
+	
 	// Failure.
 	return nil;
 }
@@ -90,8 +100,8 @@ spin: // Spin in case the size changes under us…
 
 - (void)dealloc
 {
-	//NSLog(@"dealloc: XAttr");
 	[self closeFile];
+	
 	[super dealloc];
 }
 
@@ -99,7 +109,8 @@ spin: // Spin in case the size changes under us…
 {
 	if ([theURL isFileURL] || [theURL isFileReferenceURL]) {
 		return [self initWithFile:[theURL path]];
-	} else {
+	}
+	else {
 		return nil;
 	}
 }
@@ -192,6 +203,7 @@ spin: // Spin in case the size changes under us…
 		NSString *name = [NSString stringWithUTF8String:key];
 		[array addObject:name];
 	}
+	
 	return [array autorelease];
 }
 
