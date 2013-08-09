@@ -161,7 +161,7 @@ spin: // Spin in case the size changes under us…
 
 - (BOOL)removeDataForKey:(NSString *)key
 {
-	if (fd == -1) {
+	if (key == nil || fd == -1) {
 		return NO;
 	}
 	
@@ -174,7 +174,7 @@ spin: // Spin in case the size changes under us…
 
 - (BOOL)setData:(NSData *)value forKey:(NSString *)key
 {
-	if (fd == -1) {
+	if (key == nil || fd == -1) {
 		return NO;
 	}
 	
@@ -187,7 +187,7 @@ spin: // Spin in case the size changes under us…
 
 - (NSData *)dataForKey:(NSString *)key
 {
-	if (fd == -1) {
+	if (key == nil || fd == -1) {
 		return nil;
 	}
 	
