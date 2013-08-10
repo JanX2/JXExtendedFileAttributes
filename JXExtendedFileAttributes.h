@@ -15,8 +15,8 @@
 }
 
 // Returns nil on failure
-- (id)initWithURL:(NSURL *)theURL;
-- (id)initWithFile:(NSString *)path;
+- (instancetype)initWithURL:(NSURL *)theURL;
+- (instancetype)initWithFile:(NSString *)path;
 
 // Returns an array of NSString, returns nil on failure
 - (NSArray *)keys;
