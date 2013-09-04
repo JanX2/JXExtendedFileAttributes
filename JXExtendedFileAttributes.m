@@ -235,10 +235,7 @@ spin: // Spin in case the size changes under us…
 		value = unarchivedRoot;
 	}
 	else {
-		value = [NSPropertyListSerialization propertyListWithData:data
-														  options:0
-														   format:NULL
-															error:NULL];
+        value = plistRootForData(data);
 	}
 	
 	if (value == nil) {
@@ -283,6 +280,117 @@ spin: // Spin in case the size changes under us…
 		return [self setData:data forKey:key];
 	}
 
+}
+
+
+- (id)objectForKey:(NSString *)key ofType:(JXExtendedFileAttributesValueTypes)valueType;
+{
+	NSData *data = [self dataForKey:key];
+	if (data == nil)  return nil;
+	
+	id value = nil;
+	
+	switch (valueType) {
+		case JXExtendedFileAttributesNSStringType:
+			value = stringForData(data);
+			break;
+			
+		case JXExtendedFileAttributesNSPropertyListType:
+			value = plistRootForData(data);
+			break;
+			
+		case JXExtendedFileAttributesNSCodingType:
+			value = [NSUnarchiver unarchiveObjectWithData:data];
+			break;
+			
+		case JXExtendedFileAttributesNSDataType:
+			value = data;
+			break;
+			
+		default:
+			break;
+	}
+	
+	return value;
+}
+
+- (BOOL)setObject:(id <NSObject, NSCoding>)value ofType:(JXExtendedFileAttributesValueTypes)valueType forKey:(NSString *)key;
+{
+	NSPropertyListFormat outFormat = NSPropertyListBinaryFormat_v1_0;
+	NSData *data = nil;
+	
+	switch (valueType) {
+		case JXExtendedFileAttributesNSStringType:
+			data = [(NSString *)value dataUsingEncoding:NSUTF8StringEncoding];
+			break;
+			
+		case JXExtendedFileAttributesNSPropertyListType:
+			if (![NSPropertyListSerialization propertyList:value
+										  isValidForFormat:outFormat]) {
+				data = [NSPropertyListSerialization dataWithPropertyList:value
+																  format:outFormat
+																 options:0
+																   error:NULL];
+			}
+			break;
+			
+		case JXExtendedFileAttributesNSCodingType:
+			data = [NSKeyedArchiver archivedDataWithRootObject:value];
+			break;
+			
+		case JXExtendedFileAttributesNSDataType:
+			data = (NSData *)value;
+			break;
+			
+		default:
+			break;
+	}
+	
+	if (data == nil) {
+		return NO;
+	}
+	else {
+		return [self setData:data forKey:key];
+	}
+	
+}
+
+
+- (NSString *)stringForKey:(NSString *)key;
+{
+	NSData *data = [self dataForKey:key];
+	if (data == nil)  return nil;
+	
+	NSString *value = stringForData(data);
+	
+	return value;
+}
+
+- (BOOL)setString:(NSString *)value forKey:(NSString *)key;
+{
+	NSData *data = [(NSString *)value dataUsingEncoding:NSUTF8StringEncoding];
+	return [self setData:data forKey:key];
+}
+
+
+#pragma mark Utility functions
+
+id plistRootForData(NSData *data) {
+    id plistRoot = [NSPropertyListSerialization propertyListWithData:data
+															 options:NSPropertyListImmutable
+															  format:NULL
+															   error:NULL];
+    return plistRoot;
+}
+
+NSString * stringForData(NSData *data) {
+    NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+	
+#if !__has_feature(objc_arc)
+	[string autorelease];
+#endif
+	
+    return string;
 }
 
 @end

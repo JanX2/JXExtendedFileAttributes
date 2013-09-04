@@ -10,6 +10,13 @@
 
 #import <Cocoa/Cocoa.h>
 
+typedef NS_ENUM(NSUInteger, JXExtendedFileAttributesValueTypes) {
+	JXExtendedFileAttributesNSStringType = 0,
+	JXExtendedFileAttributesNSPropertyListType = 1,
+	JXExtendedFileAttributesNSCodingType = 2,
+	JXExtendedFileAttributesNSDataType = NSUIntegerMax,
+};
+
 @interface JXExtendedFileAttributes : NSObject {
 	int _fd;
 }
@@ -37,6 +44,14 @@
 // Convenience methods auto-detecting necessary conversions.
 - (id)objectForKey:(NSString *)key;
 - (BOOL)setObject:(id <NSObject, NSCoding>)value forKey:(NSString *)key;
+
+// Convenience methods for known types.
+- (id)objectForKey:(NSString *)key ofType:(JXExtendedFileAttributesValueTypes)valueType;
+- (BOOL)setObject:(id <NSObject, NSCoding>)value ofType:(JXExtendedFileAttributesValueTypes)valueType forKey:(NSString *)key;
+
+// Type-specific convenience methods.
+- (NSString *)stringForKey:(NSString *)key;
+- (BOOL)setString:(NSString *)value forKey:(NSString *)key;
 
 // Close file immediately rather than waiting for dealloc
 - (void)closeFile;
