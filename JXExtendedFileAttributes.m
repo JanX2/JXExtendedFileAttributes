@@ -1,5 +1,5 @@
 //
-//  XAttr.m
+//  JXExtendedFileAttributes.m
 //  xattr
 //
 //  Created by Robert Pointon on 14/06/2005.
