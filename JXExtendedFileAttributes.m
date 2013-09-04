@@ -262,8 +262,8 @@ spin: // Spin in case the size changes under us…
 	else if ([value isKindOfClass:[NSData class]]) {
 		data = (NSData *)value;
 	}
-    else if (![NSPropertyListSerialization propertyList:value
-								  isValidForFormat:outFormat]) {
+    else if ([NSPropertyListSerialization propertyList:value
+									  isValidForFormat:outFormat]) {
 		data = [NSPropertyListSerialization dataWithPropertyList:value
 														  format:outFormat
 														 options:0
@@ -318,6 +318,7 @@ spin: // Spin in case the size changes under us…
 {
 	NSPropertyListFormat outFormat = NSPropertyListBinaryFormat_v1_0;
 	NSData *data = nil;
+	NSError *error;
 	
 	switch (valueType) {
 		case JXExtendedFileAttributesNSStringType:
@@ -325,12 +326,12 @@ spin: // Spin in case the size changes under us…
 			break;
 			
 		case JXExtendedFileAttributesNSPropertyListType:
-			if (![NSPropertyListSerialization propertyList:value
-										  isValidForFormat:outFormat]) {
+			if ([NSPropertyListSerialization propertyList:value
+										 isValidForFormat:outFormat]) {
 				data = [NSPropertyListSerialization dataWithPropertyList:value
 																  format:outFormat
 																 options:0
-																   error:NULL];
+																   error:&error];
 			}
 			break;
 			
