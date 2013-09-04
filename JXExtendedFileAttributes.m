@@ -223,6 +223,8 @@ spin: // Spin in case the size changes under us…
 }
 
 
+#pragma mark Convenience methods
+
 - (id)objectForKey:(NSString *)key;
 {
 	NSData *data = [self dataForKey:key];
@@ -240,18 +242,17 @@ spin: // Spin in case the size changes under us…
 	}
 	
 	if (value == nil) {
-		// Fallback 1
+		// Fallback 1.
 		value = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 	}
 	
 	if (value == nil) {
-		// Fallback 2
+		// Fallback 2.
 		value = data;
 	}
 	
 	return value;
 }
-
 
 - (BOOL)setObject:(id <NSObject, NSCoding>)value forKey:(NSString *)key;
 {
