@@ -230,7 +230,7 @@ spin: // Spin in case the size changes under us…
 	NSData *data = [self dataForKey:key];
 	id value = nil;
 	
-	id unarchivedRoot = [NSUnarchiver unarchiveObjectWithData:data];
+	id unarchivedRoot = [NSKeyedUnarchiver unarchiveObjectWithData:data];
 	if (unarchivedRoot != nil) {
 		value = unarchivedRoot;
 	}
@@ -300,7 +300,7 @@ spin: // Spin in case the size changes under us…
 			break;
 			
 		case JXExtendedFileAttributesNSCodingType:
-			value = [NSUnarchiver unarchiveObjectWithData:data];
+			value = [NSKeyedUnarchiver unarchiveObjectWithData:data];
 			break;
 			
 		case JXExtendedFileAttributesNSDataType:
