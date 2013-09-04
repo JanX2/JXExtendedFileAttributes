@@ -147,7 +147,7 @@ spin: // Spin in case the size changes under us…
 	char *key;
 	char *start = (char *)[listData bytes];
 	
-	for (key = start; (key - start) < [listData length]; key += strlen(key) + 1) {
+	for (key = start; (key - start) < (ssize_t)[listData length]; key += strlen(key) + 1) {
 		int ret = fremovexattr(_fd, key, options);
 		if (ret != 0) {
 			return NO;
@@ -214,7 +214,7 @@ spin: // Spin in case the size changes under us…
 	char *key;
 	char *start = (char *)[listData bytes];
 	
-	for (key = start; (key - start) < [listData length]; key += strlen(key) + 1) {
+	for (key = start; (key - start) < (ssize_t)[listData length]; key += strlen(key) + 1) {
 		NSString *name = [NSString stringWithUTF8String:key];
 		[array addObject:name];
 	}
