@@ -34,6 +34,10 @@
 // Removes data if value is nil
 - (BOOL)setData:(NSData *)value forKey:(NSString *)key;
 
+// Convenience methods auto-detecting necessary conversions.
+- (id)objectForKey:(NSString *)key;
+- (BOOL)setObject:(id <NSObject, NSCoding>)value forKey:(NSString *)key;
+
 // Close file immediately rather than waiting for dealloc
 - (void)closeFile;
 

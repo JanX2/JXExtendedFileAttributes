@@ -222,4 +222,66 @@ spin: // Spin in case the size changes under us…
 	return array;
 }
 
+
+- (id)objectForKey:(NSString *)key;
+{
+	NSData *data = [self dataForKey:key];
+	id value = nil;
+	
+	id unarchivedRoot = [NSUnarchiver unarchiveObjectWithData:data];
+	if (unarchivedRoot != nil) {
+		value = unarchivedRoot;
+	}
+	else {
+		value = [NSPropertyListSerialization propertyListWithData:data
+														  options:0
+														   format:NULL
+															error:NULL];
+	}
+	
+	if (value == nil) {
+		// Fallback 1
+		value = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+	}
+	
+	if (value == nil) {
+		// Fallback 2
+		value = data;
+	}
+	
+	return value;
+}
+
+
+- (BOOL)setObject:(id <NSObject, NSCoding>)value forKey:(NSString *)key;
+{
+	NSPropertyListFormat outFormat = NSPropertyListBinaryFormat_v1_0;
+	NSData *data = nil;
+
+	if ([value isKindOfClass:[NSString class]]) {
+		data = [(NSString *)value dataUsingEncoding:NSUTF8StringEncoding];
+	}
+	else if ([value isKindOfClass:[NSData class]]) {
+		data = (NSData *)value;
+	}
+    else if (![NSPropertyListSerialization propertyList:value
+								  isValidForFormat:outFormat]) {
+		data = [NSPropertyListSerialization dataWithPropertyList:value
+														  format:outFormat
+														 options:0
+														   error:NULL];
+    }
+	else {
+		data = [NSKeyedArchiver archivedDataWithRootObject:value];
+	}
+	
+	if (data == nil) {
+		return NO;
+	}
+	else {
+		return [self setData:data forKey:key];
+	}
+
+}
+
 @end
