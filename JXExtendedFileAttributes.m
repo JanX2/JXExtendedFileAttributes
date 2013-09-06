@@ -240,7 +240,7 @@ spin: // Spin in case the size changes under us…
 	
 	if (value == nil) {
 		// Fallback 1.
-		value = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+		value = stringForData(data);
 	}
 	
 	if (value == nil) {
