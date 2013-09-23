@@ -215,7 +215,7 @@ spin: // Spin in case the size changes under us…
 	char *start = (char *)[listData bytes];
 	
 	for (key = start; (key - start) < (ssize_t)[listData length]; key += strlen(key) + 1) {
-		NSString *name = [NSString stringWithUTF8String:key];
+		NSString *name = @(key);
 		[array addObject:name];
 	}
 	
