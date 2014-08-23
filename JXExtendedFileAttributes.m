@@ -17,6 +17,9 @@
 #include <string.h>
 #include <errno.h>
 
+
+NSString * const JXAppleStringEncodingAttributeKey = @"com.apple.TextEncoding";
+
 @implementation JXExtendedFileAttributes
 
 - (NSData *)_getAttributeListData
@@ -371,6 +374,66 @@ spin: // Spin in case the size changes under us…
 {
 	NSData *data = [(NSString *)value dataUsingEncoding:NSUTF8StringEncoding];
 	return [self setData:data forKey:key];
+}
+
+
++ (NSStringEncoding)stringEncodingForAttribute:(NSString *)encodingAttribute;
+{
+	if (encodingAttribute == nil)  return 0;
+	
+	NSStringEncoding encoding = 0;
+	BOOL success = NO;
+	
+	NSArray *array = [encodingAttribute componentsSeparatedByString:@";"];
+	if (array.count >= 2) {
+		CFStringRef encodingName = (__bridge CFStringRef)array[0];
+		CFStringEncoding cfEncodingFromName = CFStringConvertIANACharSetNameToEncoding(encodingName);
+		
+		NSString *encodingNumberString = array[1];
+		CFStringEncoding cfEncoding = (CFStringEncoding)[encodingNumberString longLongValue];
+		
+		if (cfEncoding == cfEncodingFromName) {
+			encoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
+			success = YES;
+		}
+	}
+	else {
+		NSLog(@"Could not parse ‘%@’ for key ‘%@’", encodingAttribute, JXAppleStringEncodingAttributeKey);
+	}
+	
+	encoding = success ? encoding : 0;
+	
+	return encoding;
+}
+
+- (NSStringEncoding)appleStringEncoding;
+{
+	NSString *encodingAttribute = [self stringForKey:JXAppleStringEncodingAttributeKey];
+	
+	NSStringEncoding encoding = [[self class] stringEncodingForAttribute:encodingAttribute];
+	
+	return encoding;
+}
+
++ (NSString *)attributeForEncoding:(NSStringEncoding)encoding;
+{
+	if (encoding == 0)  return nil;
+	
+	CFStringEncoding cfEncoding = CFStringConvertNSStringEncodingToEncoding(encoding);
+	CFStringRef encodingName = CFStringConvertEncodingToIANACharSetName(cfEncoding);
+	NSString *encodingAttribute = [NSString stringWithFormat:@"%@;%lu", encodingName, (unsigned long)cfEncoding];
+	
+	return encodingAttribute;
+}
+
+- (BOOL)setAppleStringEncoding:(NSStringEncoding)encoding;
+{
+	NSString *encodingAttribute = [[self class] attributeForEncoding:encoding];
+	
+	if (encodingAttribute == nil)  return NO;
+	
+	return [self setString:encodingAttribute
+					forKey:JXAppleStringEncodingAttributeKey];
 }
 
 

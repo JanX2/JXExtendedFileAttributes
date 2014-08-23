@@ -17,6 +17,8 @@ typedef NS_ENUM(NSUInteger, JXExtendedFileAttributesValueTypes) {
 	JXExtendedFileAttributesNSDataType = NSUIntegerMax,
 };
 
+extern NSString * const JXAppleStringEncodingAttributeKey;
+
 @interface JXExtendedFileAttributes : NSObject {
 	int _fd;
 }
@@ -52,6 +54,12 @@ typedef NS_ENUM(NSUInteger, JXExtendedFileAttributesValueTypes) {
 // Type-specific convenience methods.
 - (NSString *)stringForKey:(NSString *)key;
 - (BOOL)setString:(NSString *)value forKey:(NSString *)key;
+
+- (NSStringEncoding)appleStringEncoding;
+- (BOOL)setAppleStringEncoding:(NSStringEncoding)encoding;
+
++ (NSStringEncoding)stringEncodingForAttribute:(NSString *)encodingAttribute;
++ (NSString *)attributeForEncoding:(NSStringEncoding)encoding;
 
 // Close file immediately rather than waiting for -dealloc.
 - (void)closeFile;
