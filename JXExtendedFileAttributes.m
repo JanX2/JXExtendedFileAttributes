@@ -161,9 +161,9 @@ spin: // Spin in case the size changes under us…
 }
 
 
-#define xattrKeynameCStringForNSString(keyname, key)	\
+#define xattrKeynameCStringForNSStringKeyWithErrorReturnValue(keyname, key, errorReturnValue)	\
 	char keyname[XATTR_MAXNAMELEN + 1];\
-	if ([key getCString:keyname maxLength:(XATTR_MAXNAMELEN + 1) encoding:NSUTF8StringEncoding] == NO)  return NO;
+	if ([key getCString:keyname maxLength:(XATTR_MAXNAMELEN + 1) encoding:NSUTF8StringEncoding] == NO)  return errorReturnValue;
 
 
 - (BOOL)removeDataForKey:(NSString *)key
@@ -174,7 +174,7 @@ spin: // Spin in case the size changes under us…
 	
 	int options = 0x00;
 	
-	xattrKeynameCStringForNSString(keyname, key);
+	xattrKeynameCStringForNSStringKeyWithErrorReturnValue(keyname, key, NO);
 	int ret = fremovexattr(_fd, keyname, options);
 	return ret == 0;
 }
@@ -191,7 +191,7 @@ spin: // Spin in case the size changes under us…
 	
 	int options = 0x00;
 	
-	xattrKeynameCStringForNSString(keyname, key);
+	xattrKeynameCStringForNSStringKeyWithErrorReturnValue(keyname, key, NO);
 	int ret = fsetxattr(_fd, keyname, (char *)[value bytes], [value length], 0, options);
 	return ret == 0;
 }
@@ -202,7 +202,7 @@ spin: // Spin in case the size changes under us…
 		return nil;
 	}
 	
-	xattrKeynameCStringForNSString(keyname, key);
+	xattrKeynameCStringForNSStringKeyWithErrorReturnValue(keyname, key, nil);
 	return [self _valueDataForCStringKey:keyname];
 }
 
