@@ -28,6 +28,7 @@ extern NSString * const JXAppleStringEncodingAttributeKey;
 - (instancetype)initWithFile:(NSString *)path;
 
 // Returns an array of NSString, returns nil on failure.
+// Keys are in arbitrary order.
 - (NSArray *)keys;
 
 // Returns nil on failure.
