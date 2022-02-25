@@ -147,8 +147,8 @@ spin: // Spin in case the size changes under us…
 	}
 	
 	int options = 0x00;
-	char *key;
-	char *start = (char *)[listData bytes];
+	const char *key;
+	const char *start = [listData bytes];
 	
 	for (key = start; (key - start) < (ssize_t)[listData length]; key += strlen(key) + 1) {
 		int ret = fremovexattr(_fd, key, options);
@@ -192,7 +192,7 @@ spin: // Spin in case the size changes under us…
 	int options = 0x00;
 	
 	xattrKeynameCStringForNSStringKeyWithErrorReturnValue(keyname, key, NO);
-	int ret = fsetxattr(_fd, keyname, (char *)[value bytes], [value length], 0, options);
+	int ret = fsetxattr(_fd, keyname, (const char *)[value bytes], [value length], 0, options);
 	return ret == 0;
 }
 
@@ -214,8 +214,8 @@ spin: // Spin in case the size changes under us…
 	}
 	
 	NSMutableArray *array = [NSMutableArray array];
-	char *key;
-	char *start = (char *)[listData bytes];
+	const char *key;
+	const char *start = [listData bytes];
 	
 	for (key = start; (key - start) < (ssize_t)[listData length]; key += strlen(key) + 1) {
 		NSString *name = @(key);
