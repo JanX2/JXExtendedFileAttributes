@@ -125,7 +125,7 @@ spin: // Spin in case the size changes under us…
 
 - (instancetype)initWithFile:(NSString *)path
 {
-	if (self = [super init]) {
+  if ((self = [super init])) {
 		_fd = open([path fileSystemRepresentation], O_RDONLY, 0);
 		if (_fd < 0) {
 			//NSLog(@"Err: Unable to open file");
@@ -238,7 +238,7 @@ spin: // Spin in case the size changes under us…
 		value = unarchivedRoot;
 	}
 	else {
-        value = plistRootForData(data);
+		value = plistRootForData(data);
 	}
 	
 	if (value == nil) {
@@ -265,13 +265,13 @@ spin: // Spin in case the size changes under us…
 	else if ([value isKindOfClass:[NSData class]]) {
 		data = (NSData *)value;
 	}
-    else if ([NSPropertyListSerialization propertyList:value
+	else if ([NSPropertyListSerialization propertyList:value
 									  isValidForFormat:outFormat]) {
 		data = [NSPropertyListSerialization dataWithPropertyList:value
 														  format:outFormat
 														 options:0
 														   error:NULL];
-    }
+	}
 	else {
 		data = [NSKeyedArchiver archivedDataWithRootObject:value];
 	}
@@ -440,21 +440,21 @@ spin: // Spin in case the size changes under us…
 #pragma mark Utility functions
 
 id plistRootForData(NSData *data) {
-    id plistRoot = [NSPropertyListSerialization propertyListWithData:data
+	id plistRoot = [NSPropertyListSerialization propertyListWithData:data
 															 options:NSPropertyListImmutable
 															  format:NULL
 															   error:NULL];
-    return plistRoot;
+	return plistRoot;
 }
 
 NSString * stringForData(NSData *data) {
-    NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+	NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 	
 #if !__has_feature(objc_arc)
 	[string autorelease];
 #endif
 	
-    return string;
+	return string;
 }
 
 @end
