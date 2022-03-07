@@ -36,16 +36,16 @@ NSString * const JXAppleStringEncodingAttributeKey = @"com.apple.TextEncoding";
 	}
 	
 	NSMutableData *data = [NSMutableData dataWithCapacity:size];
-	[data setLength:size];
+	data.length = size;
 	
 spin: // Spin in case the size changes under us…
-	buff = (char *)[data mutableBytes];
+	buff = (char *)data.mutableBytes;
 	errno = 0;
 	
 	size = flistxattr(_fd, buff, size, options);
 	if (size != -1) {
 		// Success.
-		[data setLength:size];
+		data.length = size;
 		return data;
 	}
 	
@@ -53,7 +53,7 @@ spin: // Spin in case the size changes under us…
 		// Guess the value size again.
 		size = flistxattr(_fd, NULL, 0, options);
 		if (size != -1) {
-			[data setLength:size];
+			data.length = size;
 			goto spin;
 		}
 	}
@@ -73,16 +73,16 @@ spin: // Spin in case the size changes under us…
 	}
 	
 	NSMutableData *data = [NSMutableData dataWithCapacity:size];
-	[data setLength:size];
+	data.length = size;
 	
 spin: // Spin in case the size changes under us…
-	buff = (char *)[data mutableBytes];
+	buff = (char *)data.mutableBytes;
 	errno = 0;
 	
 	size = fgetxattr(_fd, key, buff, size, 0, options);
 	if (size != -1) {
 		// Success.
-		[data setLength:size];
+		data.length = size;
 		return data;
 	}
 	
@@ -90,7 +90,7 @@ spin: // Spin in case the size changes under us…
 		// Guess the value size again.
 		size = fgetxattr(_fd, key, NULL, 0, 0, options);
 		if (size != -1) {
-			[data setLength:size];
+			data.length = size;
 			goto spin;
 		}
 	}
@@ -114,8 +114,8 @@ spin: // Spin in case the size changes under us…
 
 - (instancetype)initWithURL:(NSURL *)theURL;
 {
-	if ([theURL isFileURL] || [theURL isFileReferenceURL]) {
-		return [self initWithFile:[theURL path]];
+	if (theURL.fileURL || [theURL isFileReferenceURL]) {
+		return [self initWithFile:theURL.path];
 	}
 	else {
 		return nil;
@@ -125,7 +125,7 @@ spin: // Spin in case the size changes under us…
 - (instancetype)initWithFile:(NSString *)path
 {
 	if ((self = [super init])) {
-		_fd = open([path fileSystemRepresentation], O_RDONLY, 0);
+		_fd = open(path.fileSystemRepresentation, O_RDONLY, 0);
 		if (_fd < 0) {
 			//NSLog(@"Err: Unable to open file");
 			return nil;
@@ -144,9 +144,9 @@ spin: // Spin in case the size changes under us…
 	
 	int options = 0x00;
 	const char *key;
-	const char *start = [listData bytes];
+	const char *start = listData.bytes;
 	
-	for (key = start; (key - start) < (ssize_t)[listData length]; key += strlen(key) + 1) {
+	for (key = start; (key - start) < (ssize_t)listData.length; key += strlen(key) + 1) {
 		int ret = fremovexattr(_fd, key, options);
 		if (ret != 0) {
 			return NO;
@@ -188,7 +188,7 @@ spin: // Spin in case the size changes under us…
 	int options = 0x00;
 	
 	xattrKeynameCStringForNSStringKeyWithErrorReturnValue(keyname, key, NO);
-	int ret = fsetxattr(_fd, keyname, (const char *)[value bytes], [value length], 0, options);
+	int ret = fsetxattr(_fd, keyname, (const char *)value.bytes, value.length, 0, options);
 	return ret == 0;
 }
 
@@ -211,9 +211,9 @@ spin: // Spin in case the size changes under us…
 	
 	NSMutableArray *array = [NSMutableArray array];
 	const char *key;
-	const char *start = [listData bytes];
+	const char *start = listData.bytes;
 	
-	for (key = start; (key - start) < (ssize_t)[listData length]; key += strlen(key) + 1) {
+	for (key = start; (key - start) < (ssize_t)listData.length; key += strlen(key) + 1) {
 		NSString *name = @(key);
 		[array addObject:name];
 	}
@@ -386,7 +386,7 @@ spin: // Spin in case the size changes under us…
 		CFStringEncoding cfEncodingFromName = CFStringConvertIANACharSetNameToEncoding(encodingName);
 		
 		NSString *encodingNumberString = array[1];
-		CFStringEncoding cfEncoding = (CFStringEncoding)[encodingNumberString longLongValue];
+		CFStringEncoding cfEncoding = (CFStringEncoding)encodingNumberString.longLongValue;
 		
 		if (cfEncoding == cfEncodingFromName) {
 			encoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding);
