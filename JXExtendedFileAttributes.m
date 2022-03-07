@@ -24,12 +24,10 @@ NSString * const JXAppleStringEncodingAttributeKey = @"com.apple.TextEncoding";
 #define XATTR_MAXNAMELEN_TERMINATED	(XATTR_MAXNAMELEN + 1)
 #define NAME_BUFFER_DEFAULT_SIZE	(XATTR_MAXNAMELEN_TERMINATED * 4)
 
-typedef BOOL (^JXEFAProcess)(const char *, ssize_t);
-
 
 @implementation JXExtendedFileAttributes
 
-- (BOOL)_processAttributeListData:(JXEFAProcess)process
+- (BOOL)_processAttributeListData:(BOOL (^)(const char *, ssize_t))process
 {
 	int options = 0x00;
 	char *buffer;
