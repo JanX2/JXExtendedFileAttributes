@@ -90,28 +90,36 @@ typedef BOOL (^JXEFAProcess)(const char *, ssize_t);
 	NSMutableData *data = [NSMutableData dataWithCapacity:size];
 	data.length = size;
 	
-spin: // Spin in case the size changes under us…
-	buff = (char *)data.mutableBytes;
-	errno = 0;
+	BOOL completed = NO;
 	
-	size = fgetxattr(_fd, key, buff, size, 0, options);
-	if (size != -1) {
-		// Success.
-		data.length = size;
-		return data;
-	}
-	
-	if (errno == ERANGE) {
-		// Guess the value size again.
-		size = fgetxattr(_fd, key, NULL, 0, 0, options);
+	do { // Repeat in case the buffer size needs to increase…
+		buff = (char *)data.mutableBytes;
+		errno = 0;
+		
+		size = fgetxattr(_fd, key, buff, size, 0, options);
 		if (size != -1) {
+			// Success.
 			data.length = size;
-			goto spin;
+			completed = YES;
+			break;
 		}
-	}
+		
+		if (errno == ERANGE) {
+			// Request the size again.
+			size = fgetxattr(_fd, key, NULL, 0, 0, options);
+			
+			if (size != -1) {
+				// Increase buffer size.
+				data.length = size;
+				continue;
+			}
+		}
+		
+		// We don’t have a strategy implemented for recovering from this failure.
+		break;
+	} while (1);
 	
-	// Failure.
-	return nil;
+	return completed ? data : nil;
 }
 
 - (void)closeFile
