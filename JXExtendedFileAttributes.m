@@ -124,7 +124,7 @@ spin: // Spin in case the size changes under us…
 
 - (instancetype)initWithFile:(NSString *)path
 {
-  if ((self = [super init])) {
+	if ((self = [super init])) {
 		_fd = open([path fileSystemRepresentation], O_RDONLY, 0);
 		if (_fd < 0) {
 			//NSLog(@"Err: Unable to open file");
