@@ -21,6 +21,8 @@
 NSString * const JXAppleStringEncodingAttributeKey = @"com.apple.TextEncoding";
 
 
+#define XATTR_MAXNAMELEN_TERMINATED	XATTR_MAXNAMELEN + 1
+
 @implementation JXExtendedFileAttributes
 
 - (NSData *)_getAttributeListData
@@ -156,8 +158,8 @@ spin: // Spin in case the size changes under us…
 
 
 #define xattrKeynameCStringForNSStringKeyWithErrorReturnValue(keyname, key, errorReturnValue)	\
-	char keyname[XATTR_MAXNAMELEN + 1];\
-	if ([key getCString:keyname maxLength:(XATTR_MAXNAMELEN + 1) encoding:NSUTF8StringEncoding] == NO)  return errorReturnValue;
+	char keyname[XATTR_MAXNAMELEN_TERMINATED];\
+	if ([key getCString:keyname maxLength:(XATTR_MAXNAMELEN_TERMINATED) encoding:NSUTF8StringEncoding] == NO)  return errorReturnValue;
 
 
 - (BOOL)removeDataForKey:(NSString *)key
