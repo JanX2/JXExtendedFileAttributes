@@ -23,16 +23,21 @@ NSString * const JXAppleStringEncodingAttributeKey = @"com.apple.TextEncoding";
 
 #define XATTR_MAXNAMELEN_TERMINATED	XATTR_MAXNAMELEN + 1
 
+
+typedef BOOL (^JXEFAProcess)(const char *, ssize_t);
+
+
 @implementation JXExtendedFileAttributes
 
-- (NSData *)_getAttributeListData
+- (BOOL)_processAttributeListData:(JXEFAProcess)process
 {
 	int options = 0x00;
 	char *buff;
 	
 	ssize_t size = flistxattr(_fd, NULL, 0, options);
 	if (size == -1) {
-		return nil;
+		//NSLog(@"%d", errno);
+		return NO;
 	}
 	
 	NSMutableData *data = [NSMutableData dataWithCapacity:size];
@@ -46,7 +51,7 @@ spin: // Spin in case the size changes under us…
 	if (size != -1) {
 		// Success.
 		data.length = size;
-		return data;
+		return process(buff, size);
 	}
 	
 	if (errno == ERANGE) {
@@ -59,7 +64,7 @@ spin: // Spin in case the size changes under us…
 	}
 	
 	// Failure.
-	return nil;
+	return NO;
 }
 
 - (NSData *)_valueDataForCStringKey:(const char *)key
@@ -136,24 +141,23 @@ spin: // Spin in case the size changes under us…
 
 - (BOOL)removeAllData
 {
-	NSData *listData = [self _getAttributeListData];
-	
-	if (listData == nil) {
-		return NO;
-	}
-	
-	int options = 0x00;
-	const char *key;
-	const char *start = listData.bytes;
-	
-	for (key = start; (key - start) < (ssize_t)listData.length; key += strlen(key) + 1) {
-		int ret = fremovexattr(_fd, key, options);
-		if (ret != 0) {
-			return NO;
+	BOOL success =
+	[self _processAttributeListData:^BOOL(const char *bytes, ssize_t size) {
+		int options = 0x00;
+		const char *key;
+		const char *start = bytes;
+		
+		for (key = start; (key - start) < size; key += strlen(key) + 1) {
+			int ret = fremovexattr(self->_fd, key, options);
+			if (ret != 0) {
+				return NO;
+			}
 		}
-	}
+		
+		return YES;
+	}];
 	
-	return YES;
+	return success;
 }
 
 
@@ -204,18 +208,25 @@ spin: // Spin in case the size changes under us…
 
 - (NSArray *)keys
 {
-	NSData *listData = [self _getAttributeListData];
-	if (listData == nil) {
+	__block NSMutableArray *array = nil;
+	
+	BOOL success =
+	[self _processAttributeListData:^BOOL(const char *bytes, ssize_t size) {
+		array = [NSMutableArray array];
+		
+		const char *key;
+		const char *start = bytes;
+		
+		for (key = start; (key - start) < size; key += strlen(key) + 1) {
+			NSString *name = @(key);
+			[array addObject:name];
+		}
+		
+		return YES;
+	}];
+	
+	if (!success) {
 		return nil;
-	}
-	
-	NSMutableArray *array = [NSMutableArray array];
-	const char *key;
-	const char *start = listData.bytes;
-	
-	for (key = start; (key - start) < (ssize_t)listData.length; key += strlen(key) + 1) {
-		NSString *name = @(key);
-		[array addObject:name];
 	}
 	
 	return array;
