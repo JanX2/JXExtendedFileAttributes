@@ -20,6 +20,7 @@
 
 NSString * const JXAppleStringEncodingAttributeKey = @"com.apple.TextEncoding";
 
+
 @implementation JXExtendedFileAttributes
 
 - (NSData *)_getAttributeListData
