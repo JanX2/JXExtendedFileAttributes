@@ -21,8 +21,8 @@
 NSString * const JXAppleStringEncodingAttributeKey = @"com.apple.TextEncoding";
 
 
-#define XATTR_MAXNAMELEN_TERMINATED	XATTR_MAXNAMELEN + 1
-
+#define XATTR_MAXNAMELEN_TERMINATED	(XATTR_MAXNAMELEN + 1)
+#define NAME_BUFFER_DEFAULT_SIZE	(XATTR_MAXNAMELEN_TERMINATED * 4)
 
 typedef BOOL (^JXEFAProcess)(const char *, ssize_t);
 
@@ -32,39 +32,49 @@ typedef BOOL (^JXEFAProcess)(const char *, ssize_t);
 - (BOOL)_processAttributeListData:(JXEFAProcess)process
 {
 	int options = 0x00;
-	char *buff;
+	char *buffer;
 	
-	ssize_t size = flistxattr(_fd, NULL, 0, options);
-	if (size == -1) {
-		//NSLog(@"%d", errno);
-		return NO;
-	}
+	char *dynamic = NULL;
 	
-	NSMutableData *data = [NSMutableData dataWithCapacity:size];
-	data.length = size;
+	char fixed[NAME_BUFFER_DEFAULT_SIZE];
+	ssize_t size = NAME_BUFFER_DEFAULT_SIZE;
 	
-spin: // Spin in case the size changes under us…
-	buff = (char *)data.mutableBytes;
-	errno = 0;
+	BOOL success = NO;
 	
-	size = flistxattr(_fd, buff, size, options);
-	if (size != -1) {
-		// Success.
-		data.length = size;
-		return process(buff, size);
-	}
-	
-	if (errno == ERANGE) {
-		// Guess the value size again.
-		size = flistxattr(_fd, NULL, 0, options);
+	do { // Repeat in case the buffer size needs to increase…
+		buffer = dynamic ? dynamic : (char *)&fixed;
+		
+		errno = 0;
+		size = flistxattr(_fd, buffer, size, options);
+		int errorCode = errno;
+		
 		if (size != -1) {
-			data.length = size;
-			goto spin;
+			// Success.
+			success = process(buffer, size);
+			break;
 		}
+		
+		if (errorCode == ERANGE) {
+			// Request the size again.
+			size = flistxattr(_fd, NULL, 0, options);
+			
+			if (size != -1) {
+				// Increase buffer size.
+				dynamic = calloc(size, sizeof(char));
+				continue;
+			}
+		}
+		
+		// We don’t have a strategy implemented for recovering from this failure.
+		break;
+	} while (1);
+	
+	if (dynamic) {
+		free(dynamic);
+		dynamic = NULL;
 	}
 	
-	// Failure.
-	return NO;
+	return success;
 }
 
 - (NSData *)_valueDataForCStringKey:(const char *)key
