@@ -40,7 +40,8 @@ NSString * const JXAppleStringEncodingAttributeKey = @"com.apple.TextEncoding";
 	BOOL success = NO;
 	
 	do { // Repeat in case the buffer size needs to increase…
-		buffer = dynamic ? dynamic : (char *)&fixed;
+		BOOL useDynamic = dynamic != NULL;
+		buffer = useDynamic ? dynamic : (char *)&fixed;
 		
 		errno = 0;
 		size = flistxattr(_fd, buffer, size, options);
