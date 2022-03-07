@@ -108,10 +108,6 @@ spin: // Spin in case the size changes under us…
 - (void)dealloc
 {
 	[self closeFile];
-	
-#if !__has_feature(objc_arc)
-	[super dealloc];
-#endif
 }
 
 - (instancetype)initWithURL:(NSURL *)theURL;
@@ -130,9 +126,6 @@ spin: // Spin in case the size changes under us…
 		_fd = open([path fileSystemRepresentation], O_RDONLY, 0);
 		if (_fd < 0) {
 			//NSLog(@"Err: Unable to open file");
-#if !__has_feature(objc_arc)
-			[self release];
-#endif
 			return nil;
 		}
 	}
@@ -450,10 +443,6 @@ id plistRootForData(NSData *data) {
 
 NSString * stringForData(NSData *data) {
 	NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-	
-#if !__has_feature(objc_arc)
-	[string autorelease];
-#endif
 	
 	return string;
 }
