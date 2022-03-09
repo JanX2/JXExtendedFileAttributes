@@ -23,6 +23,7 @@ NSString * const JXAppleStringEncodingAttributeKey = @"com.apple.TextEncoding";
 
 #define XATTR_MAXNAMELEN_TERMINATED	(XATTR_MAXNAMELEN + 1)
 #define NAME_BUFFER_DEFAULT_SIZE	(XATTR_MAXNAMELEN_TERMINATED * 4)
+#define VALUE_BUFFER_DEFAULT_SIZE	512
 
 
 @implementation JXExtendedFileAttributes
@@ -76,40 +77,71 @@ NSString * const JXAppleStringEncodingAttributeKey = @"com.apple.TextEncoding";
 	return success;
 }
 
-- (NSData *)_valueDataForCStringKey:(const char *)key
+void allocExternalDefault(char **buffer, ssize_t size) {
+	*buffer = calloc(size, sizeof(char));
+}
+
+void deallocExternalDefault(char **buffer) {
+	free(*buffer);
+	*buffer = NULL;
+}
+
+- (BOOL)_processValueData:(BOOL (^)(const char *, ssize_t))process
+			allocExternal:(void (^)(char **buffer, ssize_t size))allocExternal
+		  deallocExternal:(void (^)(char **buffer))deallocExternal
+			forCStringKey:(const char *)key
 {
 	int options = 0x00;
-	char *buff;
+	char *buffer;
 	
-	ssize_t size = fgetxattr(_fd, key, NULL, 0, 0, options);
-	if (size == -1) {
-		return nil;
+	__block char *dynamic = NULL;
+
+	char fixed[VALUE_BUFFER_DEFAULT_SIZE];
+	__block ssize_t size = VALUE_BUFFER_DEFAULT_SIZE;
+	
+	BOOL (^resizeExternal)(void) = ^{
+		// Request the size.
+		size = fgetxattr(self->_fd, key, NULL, 0, 0, options);
+		
+		if (size != -1) {
+			// Increase buffer size.
+			if (allocExternal) {
+				allocExternal(&dynamic, size);
+			}
+			else {
+				allocExternalDefault(&dynamic, size);
+			}
+			
+			return YES;
+		}
+		
+		return NO;
+	};
+	
+	if (allocExternal) {
+		// Request pre-allocated space, if not using the `fixed` internal buffer.
+		resizeExternal();
 	}
 	
-	NSMutableData *data = [NSMutableData dataWithCapacity:size];
-	data.length = size;
-	
-	BOOL completed = NO;
+	BOOL success = NO;
 	
 	do { // Repeat in case the buffer size needs to increase…
-		buff = (char *)data.mutableBytes;
-		errno = 0;
+		BOOL useDynamic = dynamic != NULL;
+		buffer = useDynamic ? dynamic : (char *)&fixed;
 		
-		size = fgetxattr(_fd, key, buff, size, 0, options);
+		errno = 0;
+		size = fgetxattr(_fd, key, buffer, size, 0, options);
+		int errorCode = errno;
+		
 		if (size != -1) {
 			// Success.
-			data.length = size;
-			completed = YES;
+			success = process(buffer, size);
 			break;
 		}
 		
-		if (errno == ERANGE) {
-			// Request the size again.
-			size = fgetxattr(_fd, key, NULL, 0, 0, options);
-			
-			if (size != -1) {
-				// Increase buffer size.
-				data.length = size;
+		if (errorCode == ERANGE) {
+			BOOL didResize = resizeExternal();
+			if (didResize) {
 				continue;
 			}
 		}
@@ -118,7 +150,52 @@ NSString * const JXAppleStringEncodingAttributeKey = @"com.apple.TextEncoding";
 		break;
 	} while (1);
 	
-	return completed ? data : nil;
+	if (dynamic) {
+		if (deallocExternal) {
+			deallocExternal(&dynamic);
+		}
+		else {
+			deallocExternalDefault(&dynamic);
+		}
+	}
+	
+	return success;
+}
+
+- (NSData *)_valueDataForCStringKey:(const char *)key
+{
+	__block NSData *data = nil;
+	
+	[self _processValueData:^BOOL(const char *bytes, ssize_t size) {
+		if (data == nil) {
+			// This shouldn’t be reached as the `allocExternal` block should always be called.
+			data = [NSData dataWithBytes:bytes length:size];
+		}
+		
+		return YES;
+	}
+			  allocExternal:^(char **buffer, ssize_t size) {
+		NSMutableData *mutableData = nil;
+		
+		if (data) {
+			// From previous `allocExternal` call. Reuse.
+			mutableData = (NSMutableData *)data;
+		}
+		else {
+			mutableData = [NSMutableData dataWithCapacity:size];
+		}
+		
+		mutableData.length = size;
+		*buffer = (char *)mutableData.mutableBytes;
+		
+		data = mutableData;
+	}
+			deallocExternal:^(char **buffer) {
+		// Do nothing. We want to keep `data` allocated and filled as it is.
+	}
+			  forCStringKey:key];
+	
+	return data;
 }
 
 - (void)closeFile
