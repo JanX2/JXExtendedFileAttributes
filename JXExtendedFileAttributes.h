@@ -9,6 +9,8 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#include <xattr_flags.h>
+
 
 typedef NS_ENUM(NSUInteger, JXExtendedFileAttributesValueTypes) {
 	JXExtendedFileAttributesNSStringType = 0,
@@ -64,5 +66,7 @@ extern NSString * const JXAppleStringEncodingAttributeKey;
 
 // Close file immediately rather than waiting for -dealloc.
 - (void)closeFile;
+
+- (BOOL)compare:(JXExtendedFileAttributes *)other withIntent:(xattr_operation_intent_t)intent API_AVAILABLE(macosx(10.10));
 
 @end

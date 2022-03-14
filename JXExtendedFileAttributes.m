@@ -538,6 +538,55 @@ void deallocExternalDefault(char **buffer) {
 }
 
 
+static NSArray * _relevantKeysForIntent(NSArray *keys, xattr_operation_intent_t intent) API_AVAILABLE(macosx(10.10)) {
+	// Filter keys by intent.
+	NSIndexSet *irrelevantIndexes = [keys indexesOfObjectsPassingTest:^BOOL(NSString * _Nonnull key, NSUInteger idx, BOOL * _Nonnull stop) {
+		xattrKeynameCStringForNSStringKeyWithErrorReturnValue(keyname, key, NO);
+		BOOL relevantForComparison = (xattr_preserve_for_intent(keyname, intent) == 1);
+		return (relevantForComparison == NO);
+	}];
+	
+	NSMutableArray *relevantKeys = [keys mutableCopy];
+	[relevantKeys removeObjectsAtIndexes:irrelevantIndexes];
+	
+	// Sort keys.
+	[relevantKeys sortUsingSelector:@selector(compare:)];
+	
+	return relevantKeys;
+}
+
+- (BOOL)compare:(JXExtendedFileAttributes *)other withIntent:(xattr_operation_intent_t)intent;
+{
+	NSArray *selfKeys = _relevantKeysForIntent(self.keys, intent);
+	NSArray *otherKeys = _relevantKeysForIntent(other.keys, intent);
+	
+	// Compare keys.
+	if ([selfKeys isEqualToArray:otherKeys]) {
+		BOOL equalValues = YES;
+		// If all keys match, compare values.
+		for (NSString *key in self.keys) {
+			NSData *selfData = [self dataForKey:key];
+			NSData *otherData = [other dataForKey:key];
+
+			if ([selfData isEqualToData:otherData] == NO) {
+				//NSLog(@"%@", selfData);
+				//NSLog(@"%@", otherData);
+				equalValues = NO;
+				break;
+			}
+		}
+		
+		return equalValues;
+	}
+	else {
+		//NSLog(@"%@", selfKeys);
+		//NSLog(@"%@", otherKeys);
+		return NO;
+	}
+
+	return NO;
+}
+
 #pragma mark Utility functions
 
 id plistRootForData(NSData *data) {
